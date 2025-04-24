@@ -10,7 +10,7 @@ export const Draggble = ({ id, subject }: { id: number; subject: string }) => {
       }
     : {};
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners} style={style}>
+    <div ref={setNodeRef} {...attributes} {...listeners} style={{...style, touchAction: "none"}}>
       <TaskItem subject={subject} />
     </div>
   );
