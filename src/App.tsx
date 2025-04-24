@@ -78,7 +78,9 @@ function App() {
         if (over?.id && blocks.includes(over.id as StatusType)) {
           setTasks(filterTasks(active.id, tasks, over.id));
         }else{
-          setTasks(removeTask(active.id, tasks))
+          if(over?.id === "delete"){
+            setTasks(removeTask(active.id, tasks))
+          }
         }
       }}
     >
