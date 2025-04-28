@@ -7,6 +7,7 @@ export const Draggble = ({ id, subject }: { id: number; subject: string }) => {
   const style = transform
     ? {
         transform: CSS.Transform.toString(transform),
+        visibility: "hidden" as const
       }
     : {};
   return (

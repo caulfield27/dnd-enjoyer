@@ -1,11 +1,13 @@
 import "./App.css";
 import { Button, Input, makeStyles } from "@fluentui/react-components";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from "@dnd-kit/core";
 import { useEffect, useRef, useState } from "react";
 import { ITasks, StatusType } from "./types";
 import { filterTasks, removeTask } from "./utils/filters";
 import { DeleteDroppable, Droppable } from "./components/Droppable";
 import { Draggble } from "./components/Draggable";
+import { TaskItem } from "./components/TaskItem";
+import { Sortable } from "./components/Sortable";
 
 const useStyles = makeStyles({
   btn: {
@@ -50,11 +52,12 @@ const useStyles = makeStyles({
 
 function App() {
   const styles = useStyles();
-  const blocks: StatusType[] = ["inprogress", "done", "important", "daily"];
+  const blocks: StatusType[] = ["inprogress", "done", "important", "sortable"];
   const storageTasks = localStorage.getItem("tasks");
   const [tasks, setTasks] = useState<ITasks[]>(storageTasks ? JSON.parse(storageTasks) : []);
   const [value, setValue] = useState("");
   const taskRef = useRef<ITasks[] | null>(null);
+  const [draggedTask, setDraggedTask] = useState<ITasks | null>(null);
 
   useEffect(() => {
     taskRef.current = tasks;
@@ -73,13 +76,21 @@ function App() {
 
   return (
     <DndContext
+      onDragStart={(event: DragStartEvent) => {
+        const task = tasks.find((task) => task.id === event.active.id);
+        if (task) {
+          setDraggedTask(task);
+        }
+      }}
       onDragEnd={(event: DragEndEvent) => {
+        setDraggedTask(null);
+        if (event.over?.id === "sortable") return;
         const { active, over } = event;
         if (over?.id && blocks.includes(over.id as StatusType)) {
           setTasks(filterTasks(active.id, tasks, over.id));
-        }else{
-          if(over?.id === "delete"){
-            setTasks(removeTask(active.id, tasks))
+        } else {
+          if (over?.id === "delete") {
+            setTasks(removeTask(active.id, tasks));
           }
         }
       }}
@@ -113,22 +124,33 @@ function App() {
         <div className={styles.grid_container}>
           {blocks.map((status) => {
             const currentTasks = tasks.filter((task) => task.status === status);
-            return (
+            return draggedTask?.status === status ? (
               <div key={status}>
                 <header className={styles.block_header}>{status}</header>
                 <div className={styles.task_list_container}>
                   {currentTasks.map((task) => {
                     return <Draggble key={task.id} id={task.id} subject={task.subject} />;
                   })}
-                  <Droppable id={status}>
-                    <div style={{ width: "150px", height: "32px" }}></div>
-                  </Droppable>
                 </div>
               </div>
+            ) : status === "sortable" ? (
+              <Sortable setData={setTasks} key={status} id={status} data={tasks} />
+            ) : (
+              <Droppable key={status} id={status}>
+                <div>
+                  <header className={styles.block_header}>{status}</header>
+                  <div className={styles.task_list_container}>
+                    {currentTasks.map((task) => {
+                      return <Draggble key={task.id} id={task.id} subject={task.subject} />;
+                    })}
+                  </div>
+                </div>
+              </Droppable>
             );
           })}
         </div>
       </div>
+      <DragOverlay>{draggedTask ? <TaskItem subject={draggedTask.subject} /> : null}</DragOverlay>
     </DndContext>
   );
 }

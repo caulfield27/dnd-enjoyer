@@ -7,7 +7,6 @@ export const Droppable = ({ id, children }: Props) => {
 
   const style = {
     border: isOver ? "1px dotted blue" : "none",
-    borderRadius: "8px",
   };
 
   return (

@@ -5,7 +5,7 @@ export interface Props {
     children: React.ReactNode;
 }
 
-export type StatusType = "inprogress" | "done" | "important" | "daily";
+export type StatusType = "inprogress" | "done" | "important" | "sortable";
 
 export interface ITasks {
   id: number;
