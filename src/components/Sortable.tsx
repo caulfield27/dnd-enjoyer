@@ -70,7 +70,7 @@ const SortableDraggble = ({ id, subject }: { id: number; subject: string }) => {
     : {};
 
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners} style={styles}>
+    <div ref={setNodeRef} {...attributes} {...listeners} style={{...styles, touchAction: "none"}}>
       <TaskItem subject={subject} />
     </div>
   );
